@@ -1,0 +1,12 @@
+{
+  "privilege":        {"nist": ["AC-6", "CM-7"],  "iso": ["A.8.2"]},
+  "root_user":        {"nist": ["AC-6", "CM-6"],  "iso": ["A.8.2", "A.8.9"]},
+  "host_access":      {"nist": ["CM-6", "CM-7"],  "iso": ["A.8.9"]},
+  "resource_limits":  {"nist": ["SC-6"],          "iso": ["A.8.6"]},
+  "rbac":             {"nist": ["AC-3", "AC-6"],  "iso": ["A.5.15", "A.8.2"]},
+  "image_hygiene":    {"nist": ["CM-6", "RA-5"],  "iso": ["A.8.9", "A.8.8"]},
+  "cis_config":       {"nist": ["CM-6"],          "iso": ["A.8.9"]},
+  "cluster_exposure": {"nist": ["RA-5", "SC-7"],  "iso": ["A.8.8", "A.8.20"]},
+  "runtime_event":    {"nist": ["SI-4", "AU-6"],  "iso": ["A.8.16"]},
+  "config":           {"nist": ["CM-6"],          "iso": ["A.8.9"]}
+}

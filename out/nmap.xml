@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE nmaprun>
 <?xml-stylesheet href="file:///usr/share/nmap/nmap.xsl" type="text/xsl"?>
-<!-- Nmap 7.991 scan initiated Fri Nov 20 15:42:43 2026 as: /usr/lib/nmap/nmap -&#45;privileged -sV -p- -T4 -oX out/nmap.xml 172.18.0.2 -->
-<nmaprun scanner="nmap" args="/usr/lib/nmap/nmap -&#45;privileged -sV -p- -T4 -oX out/nmap.xml 172.18.0.2" start="1795207363" startstr="Fri Nov 20 15:42:43 2026" version="7.991" xmloutputversion="1.05">
+<!-- Nmap 7.991 scan initiated Fri Nov 20 16:06:31 2026 as: /usr/lib/nmap/nmap -&#45;privileged -sV -p- -T4 -oX out/nmap.xml 172.18.0.2 -->
+<nmaprun scanner="nmap" args="/usr/lib/nmap/nmap -&#45;privileged -sV -p- -T4 -oX out/nmap.xml 172.18.0.2" start="1795208791" startstr="Fri Nov 20 16:06:31 2026" version="7.991" xmloutputversion="1.05">
 <scaninfo type="syn" protocol="tcp" numservices="65535" services="1-65535"/>
 <verbose level="0"/>
 <debugging level="0"/>
@@ -12,7 +12,7 @@
 <hostnames>
 </hostnames>
 </hosthint>
-<host starttime="1795207364" endtime="1795207404"><status state="up" reason="arp-response" reason_ttl="0"/>
+<host starttime="1795208793" endtime="1795208825"><status state="up" reason="arp-response" reason_ttl="0"/>
 <address addr="172.18.0.2" addrtype="ipv4"/>
 <address addr="56:75:99:D8:92:24" addrtype="mac"/>
 <hostnames>
@@ -21,13 +21,13 @@
 <extrareasons reason="reset" count="65530" proto="tcp" ports="1-2378,2381-6442,6444-10249,10251-10255,10257-65535"/>
 </extraports>
 <port protocol="tcp" portid="2379"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="etcd-client" method="table" conf="3"/></port>
-<port protocol="tcp" portid="2380"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="etcd-server" method="table" conf="3"/></port>
-<port protocol="tcp" portid="6443"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Golang net/http server" servicefp="SF-Port6443-TCP:V=7.991%T=SSL%I=7%D=11/20%Time=6B00B0E7%P=x86_64-pc-linux-gnu%r(GenericLines,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;)%r(GetRequest,22F,&quot;HTTP/1\.0\x20403\x20Forbidden\r\nAudit-Id:\x2050878177-2bfa-41f8-abad-81f28a7d10f3\r\nCache-Control:\x20no-cache,\x20private\r\nContent-Type:\x20application/json\r\nX-Content-Type-Options:\x20nosniff\r\nX-Kubernetes-Pf-Flowschema-Uid:\x200cedc124-0d5b-474b-a491-4b636d7ec505\r\nX-Kubernetes-Pf-Prioritylevel-Uid:\x20e8ba17e9-7595-4b53-ac1e-cdda45347dc6\r\nDate:\x20Fri,\x2020\x20Nov\x202026\x2020:43:19\x20GMT\r\nContent-Length:\x20185\r\n\r\n{\&quot;kind\&quot;:\&quot;Status\&quot;,\&quot;apiVersion\&quot;:\&quot;v1\&quot;,\&quot;metadata\&quot;:{},\&quot;status\&quot;:\&quot;Failure\&quot;,\&quot;message\&quot;:\&quot;forbidden:\x20User\x20\\\&quot;system:anonymous\\\&quot;\x20cannot\x20get\x20path\x20\\\&quot;/\\\&quot;\&quot;,\&quot;reason\&quot;:\&quot;Forbidden\&quot;,\&quot;details\&quot;:{},\&quot;code\&quot;:403}\n&quot;)%r(HTTPOptions,233,&quot;HTTP/1\.0\x20403\x20Forbidden\r\nAudit-Id:\x20d3188b85-d2ca-4e06-b29f-47168e8fd5db\r\nCache-Control:\x20no-cache,\x20private\r\nContent-Type:\x20application/json\r\nX-Content-Type-Options:\x20nosniff\r\nX-Kubernetes-Pf-Flowschema-Uid:\x200cedc124-0d5b-474b-a491-4b636d7ec505\r\nX-Kubernetes-Pf-Prioritylevel-Uid:\x20e8ba17e9-7595-4b53-ac1e-cdda45347dc6\r\nDate:\x20Fri,\x2020\x20Nov\x202026\x2020:43:19\x20GMT\r\nContent-Length:\x20189\r\n\r\n{\&quot;kind\&quot;:\&quot;Status\&quot;,\&quot;apiVersion\&quot;:\&quot;v1\&quot;,\&quot;metadata\&quot;:{},\&quot;status\&quot;:\&quot;Failure\&quot;,\&quot;message\&quot;:\&quot;forbidden:\x20User\x20\\\&quot;system:anonymous\\\&quot;\x20cannot\x20options\x20path\x20\\\&quot;/\\\&quot;\&quot;,\&quot;reason\&quot;:\&quot;Forbidden\&quot;,\&quot;details\&quot;:{},\&quot;code\&quot;:403}\n&quot;)%r(RTSPRequest,67,&quot;HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20Request&quot;);" tunnel="ssl" method="table" conf="3"><cpe>cpe:/a:golang:go</cpe></service></port>
+<port protocol="tcp" portid="2380"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="etcd-server" tunnel="ssl" method="table" conf="3"/></port>
+<port protocol="tcp" portid="6443"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="sun-sr-https" tunnel="ssl" method="table" conf="3"/></port>
 <port protocol="tcp" portid="10250"><state state="open" reason="syn-ack" reason_ttl="64"/></port>
 <port protocol="tcp" portid="10256"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" product="Golang net/http server" extrainfo="Go-IPFS json-rpc or InfluxDB API" method="probed" conf="10"><cpe>cpe:/a:protocol_labs:go-ipfs</cpe></service></port>
 </ports>
-<times srtt="43" rttvar="1" to="100000"/>
+<times srtt="40" rttvar="0" to="100000"/>
 </host>
-<runstats><finished time="1795207404" timestr="Fri Nov 20 15:43:24 2026" summary="Nmap done at Fri Nov 20 15:43:24 2026; 1 IP address (1 host up) scanned in 41.43 seconds" elapsed="41.43" exit="success"/><hosts up="1" down="0" total="1"/>
+<runstats><finished time="1795208825" timestr="Fri Nov 20 16:07:05 2026" summary="Nmap done at Fri Nov 20 16:07:05 2026; 1 IP address (1 host up) scanned in 33.53 seconds" elapsed="33.53" exit="success"/><hosts up="1" down="0" total="1"/>
 </runstats>
 </nmaprun>

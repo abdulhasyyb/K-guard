@@ -4,3 +4,4 @@ out/*.json
 out/events.jsonl
 out/engine.log
 job.yaml
+out/kguard.db
