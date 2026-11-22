@@ -31,12 +31,31 @@ def classify(text):
     return "config"
 
 
+def _load_json_docs(text):
+    """Checkov prints one JSON document per scanned directory; read them all."""
+    dec = json.JSONDecoder()
+    i, n, docs = 0, len(text), []
+    while i < n:
+        while i < n and text[i].isspace():
+            i += 1
+        if i >= n:
+            break
+        obj, i = dec.raw_decode(text, i)
+        docs.append(obj)
+    return docs
+
+
 def parse_checkov(path):
-    data = json.loads(pathlib.Path(path).read_text())
-    if isinstance(data, list):  # multiple frameworks -> list of reports
-        data = data[0]
+    failed, seen = [], set()
+    for doc in _load_json_docs(pathlib.Path(path).read_text()):
+        for rep in (doc if isinstance(doc, list) else [doc]):
+            for fc in rep.get("results", {}).get("failed_checks", []):
+                key = (fc["check_id"], fc["resource"])
+                if key not in seen:
+                    seen.add(key)
+                    failed.append(fc)
     rows = []
-    for fc in data.get("results", {}).get("failed_checks", []):
+    for fc in failed:
         parts = fc["resource"].split(".", 2)
         kind = parts[0]
         ns = parts[1] if len(parts) > 1 else "default"

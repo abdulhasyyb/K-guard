@@ -15,7 +15,9 @@ kubectl wait --for=condition=Ready pod --all -n web --timeout=180s
 echo "[*] waiting 75s for the Gatekeeper audit"
 sleep 75
 echo "[*] re-scanning manifests (vulnerable + clean)"
-.venv/bin/checkov -d manifests/bad -d manifests/good --framework kubernetes -o json > out/checkov.json 2>/dev/null
+rm -rf out/scan && mkdir -p out/scan
+cp manifests/bad/*.yaml manifests/good/*.yaml out/scan/
+.venv/bin/checkov -d out/scan --framework kubernetes -o json > out/checkov.json 2>/dev/null
 curl -s -X POST $API/reset/events >/dev/null
 curl -s -X POST $API/reset/snapshots >/dev/null
 curl -s -X POST $API/ingest/all

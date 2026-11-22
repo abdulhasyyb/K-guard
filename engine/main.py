@@ -73,6 +73,8 @@ def ingest(source: str):
                 res[s] = _ingest(s)
             except FileNotFoundError:
                 res[s] = "missing file"
+            except Exception as e:
+                res[s] = f"error: {e}"
         return res
     if source not in PARSERS:
         raise HTTPException(404, f"unknown source {source}; use {list(PARSERS)} or all")

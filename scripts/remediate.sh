@@ -14,7 +14,9 @@ kubectl wait --for=condition=Ready pod --all -n payments --timeout=180s
 kubectl wait --for=condition=Ready pod --all -n web --timeout=180s
 echo "[*] waiting 75s for the Gatekeeper audit to refresh"
 sleep 75
-.venv/bin/checkov -d manifests/good -d manifests/fixed --framework kubernetes -o json > out/checkov.json 2>/dev/null
+rm -rf out/scan && mkdir -p out/scan
+cp manifests/good/*.yaml manifests/fixed/*.yaml out/scan/
+.venv/bin/checkov -d out/scan --framework kubernetes -o json > out/checkov.json 2>/dev/null
 curl -s -X POST $API/reset/events >/dev/null      # incident closed
 curl -s -X POST $API/ingest/all
 echo
