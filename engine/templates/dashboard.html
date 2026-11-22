@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K-Guard</title>
+<style>
+:root{--bg:#10141a;--card:#181e27;--fg:#e6edf3;--mut:#8b98a8;--bd:#2a3340;
+--crit:#d33a3a;--high:#e8832b;--med:#d9b72e;--low:#3fa46a}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--fg)}
+header{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--bd);flex-wrap:wrap}
+h1{font-size:18px;margin:0 14px 0 0}
+h2{font-size:13px;margin:0 0 10px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+button,a.btn{background:#243040;color:var(--fg);border:1px solid var(--bd);padding:6px 12px;border-radius:6px;cursor:pointer;font:inherit;text-decoration:none}
+button:hover,a.btn:hover{background:#2e3d52}
+#status{margin-left:auto;color:var(--mut);font-size:12px}
+main{display:grid;grid-template-columns:2fr 1fr;gap:16px;padding:16px 20px}
+@media(max-width:1000px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:14px;overflow-x:auto}
+.span2{grid-column:1/-1}
+.tiles{display:flex;gap:12px;flex-wrap:wrap}
+.tile{flex:1;min-width:110px;border-radius:8px;padding:10px 14px;color:#fff}
+.tile b{font-size:26px;display:block}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--bd);vertical-align:top}
+th{color:var(--mut);font-weight:600;font-size:12px}
+.badge{display:inline-block;padding:1px 8px;border-radius:10px;color:#fff;font-size:12px;font-weight:600}
+.mut{color:var(--mut)}
+.small{font-size:12px}
+.heat{display:grid;grid-template-columns:50px repeat(5,1fr);gap:3px;min-width:420px}
+.hc{min-height:54px;border-radius:4px;padding:3px;font-size:11px;display:flex;flex-wrap:wrap;gap:3px;align-content:flex-start}
+.hl{color:var(--mut);font-size:12px;display:flex;align-items:center;justify-content:center}
+.chip{background:rgba(0,0,0,.45);border-radius:3px;padding:0 4px}
+.ev{display:grid;grid-template-columns:70px 70px 1fr;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>K-Guard</h1>
+  <button onclick="act('/ingest/all')">Re-scan (ingest all)</button>
+  <button onclick="act('/snapshot/baseline')">Snapshot: baseline</button>
+  <button onclick="act('/snapshot/after')">Snapshot: after</button>
+  <button onclick="act('/reset/events')">Close incident (clear events)</button>
+  <a class="btn" href="/export/risk-register.csv">Export risk register</a>
+  <span id="status">loading...</span>
+</header>
+<main>
+  <div class="card span2"><h2>Risk summary</h2><div class="tiles" id="tiles"></div></div>
+  <div class="card"><h2>Risk register (Likelihood x Impact)</h2><div id="risks"></div></div>
+  <div class="card"><h2>Live runtime events (Falco)</h2><div id="events"></div></div>
+  <div class="card"><h2>Risk heatmap</h2><div id="heat"></div></div>
+  <div class="card"><h2>Before / after (residual risk)</h2><div id="compare"></div></div>
+</main>
+<script>
+const COL = {Critical:'var(--crit)', High:'var(--high)', Medium:'var(--med)', Low:'var(--low)'};
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g,
+  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const band = s => s >= 17 ? 'Critical' : s >= 10 ? 'High' : s >= 5 ? 'Medium' : 'Low';
+const badge = b => `<span class="badge" style="background:${COL[b]}">${esc(b)}</span>`;
+
+async function j(url, opt) {
+  const r = await fetch(url, opt);
+  if (!r.ok) throw new Error(url + ' -> ' + r.status);
+  return r.json();
+}
+async function act(url) {
+  try { await j(url, {method: 'POST'}); } catch (e) { alert(e.message); }
+  refresh();
+}
+
+function renderTiles(risks) {
+  const n = {Critical:0, High:0, Medium:0, Low:0};
+  risks.forEach(r => n[r.band]++);
+  document.getElementById('tiles').innerHTML = Object.keys(n).map(b =>
+    `<div class="tile" style="background:${COL[b]}"><b>${n[b]}</b>${b}</div>`).join('');
+}
+
+function renderRisks(risks) {
+  const rows = risks.map(r => {
+    const pol = r.violated_constraints.length
+      ? esc(r.violated_constraints.join(', ')) + (r.enforced ? ' <span class="mut">(deny)</span>' : ' <span class="mut">(dryrun)</span>')
+      : '<span class="mut">compliant</span>';
+    return `<tr title="${esc(r.likelihood_basis.join(' | '))}">
+      <td><b>${esc(r.workload)}</b><div class="small mut">${esc(r.nist.join(', '))} &middot; ${esc(r.iso.join(', '))}</div></td>
+      <td>${r.impact}</td><td>${r.likelihood}</td><td><b>${r.score}</b></td>
+      <td>${badge(r.band)}</td><td>${esc(r.treatment)}</td>
+      <td class="small">${pol}</td><td>${r.runtime_events}</td></tr>`;
+  }).join('');
+  document.getElementById('risks').innerHTML =
+    `<table><tr><th>Asset</th><th>I</th><th>L</th><th>Score</th><th>Rating</th><th>Treatment</th><th>Policy</th><th>Events</th></tr>${rows}</table>
+     <div class="small mut" style="margin-top:8px">Hover a row to see how its likelihood was derived.</div>`;
+}
+
+function renderHeat(risks) {
+  let h = '<div class="heat"><div></div>';
+  for (let L = 1; L <= 5; L++) h += `<div class="hl">L${L}</div>`;
+  for (let I = 5; I >= 1; I--) {
+    h += `<div class="hl">I${I}</div>`;
+    for (let L = 1; L <= 5; L++) {
+      const here = risks.filter(r => r.impact === I && r.likelihood === L);
+      const chips = here.map(r => `<span class="chip">${esc(r.workload.split('/')[1])}</span>`).join('');
+      h += `<div class="hc" style="background:${COL[band(I * L)]};opacity:${here.length ? 1 : .35}">${chips}</div>`;
+    }
+  }
+  document.getElementById('heat').innerHTML = h + '</div>';
+}
+
+function renderEvents(evs) {
+  document.getElementById('events').innerHTML = evs.length
+    ? evs.slice(0, 15).map(e =>
+        `<div class="ev"><span class="mut">${new Date(e.ts * 1000).toLocaleTimeString()}</span>
+         <span>${esc(e.priority)}</span><span><b>${esc(e.rule)}</b><br><span class="mut">${esc(e.workload)}</span></span></div>`).join('')
+    : '<div class="mut">No runtime events in the store.</div>';
+}
+
+function renderCompare(rows) {
+  const have = rows.filter(r => r.before != null && r.after != null);
+  if (!have.length) {
+    document.getElementById('compare').innerHTML =
+      '<div class="mut">Take a <b>baseline</b> snapshot, remediate, then take an <b>after</b> snapshot.</div>';
+    return;
+  }
+  document.getElementById('compare').innerHTML = '<table><tr><th>Asset</th><th>Before</th><th>After</th><th>Change</th></tr>' +
+    have.map(r => `<tr><td>${esc(r.workload)}</td>
+      <td>${r.before} ${badge(r.before_band)}</td><td>${r.after} ${badge(r.after_band)}</td>
+      <td><b>${r.after - r.before}</b></td></tr>`).join('') + '</table>';
+}
+
+async function refresh() {
+  try {
+    const [risks, evs, cmp] = await Promise.all([
+      j('/api/risks'), j('/api/events?limit=15'), j('/api/compare')]);
+    renderTiles(risks); renderRisks(risks); renderHeat(risks);
+    renderEvents(evs); renderCompare(cmp);
+    document.getElementById('status').textContent = 'updated ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    document.getElementById('status').textContent = 'error: ' + e.message;
+  }
+}
+refresh();
+setInterval(refresh, 4000);
+</script>
+</body>
+</html>

@@ -21,7 +21,7 @@ def band(score):
     return "Low"
 
 
-def load_impacts():
+def _load_impacts_uncached():
     """Impact (1-5) per namespace from the kguard.io/impact label."""
     try:
         out = subprocess.run(["kubectl", "get", "ns", "-o", "json"],
@@ -139,3 +139,13 @@ def compute():
     })
     risks.sort(key=lambda r: -r["score"])
     return risks
+
+
+_CACHE = {"t": 0.0, "v": None}
+
+
+def load_impacts():
+    if _CACHE["v"] is None or time.time() - _CACHE["t"] > 20:
+        _CACHE["v"] = _load_impacts_uncached()
+        _CACHE["t"] = time.time()
+    return dict(_CACHE["v"])

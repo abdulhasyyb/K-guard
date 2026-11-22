@@ -6,7 +6,8 @@ import subprocess
 import time
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import PlainTextResponse
+import pathlib
+from fastapi.responses import HTMLResponse, PlainTextResponse
 
 from . import db, scoring
 from .parsers import PARSERS
@@ -137,7 +138,8 @@ def export_csv():
     for i, r in enumerate(cur, 1):
         wr.writerow([f"R-{i:02d}", r["workload"], r["impact"], r["likelihood"], r["score"],
                      r["band"], " | ".join(r["top_findings"]), ", ".join(r["nist"]),
-                     ", ".join(r["iso"]), r["treatment"], "yes" if r["enforced"] else "no",
+                     ", ".join(r["iso"]), r["treatment"],
+                     "yes" if r["enforced"] else ("n/a" if not r["violated_constraints"] else "no"),
                      base.get(r["workload"], {}).get("score", ""),
                      after.get(r["workload"], {}).get("score", "")])
     return buf.getvalue()
@@ -153,3 +155,8 @@ def reset(what: str):
         else:
             raise HTTPException(404, "use events or snapshots")
     return {"reset": what}
+
+
+@app.get("/", response_class=HTMLResponse)
+def dashboard():
+    return (pathlib.Path(__file__).parent / "templates" / "dashboard.html").read_text()
